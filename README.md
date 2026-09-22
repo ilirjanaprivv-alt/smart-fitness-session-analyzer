@@ -353,12 +353,6 @@ Run the tests with:
 python tests.py
 ```
 
-or:
-
-```bash
-python3 tests.py
-```
-
 The expected output is:
 
 ```text
@@ -380,22 +374,16 @@ This project only uses the Python standard library. No third-party packages are 
 Clone the repository:
 
 ```bash
-git clone https://github.com/ilkra0077/[REPOSITORY-NAME].git
+git clone https://github.com/ilirjanaprivv-alt/smart-fitness-session-analyzer.git
 ```
 
 Move into the repository:
 
 ```bash
-cd [REPOSITORY-NAME]
+cd smart-fitness-session-analyzer
 ```
 
 Run the application:
-
-```bash
-python3 main.py
-```
-
-On systems where Python is started with `python` instead of `python3`, use:
 
 ```bash
 python main.py
