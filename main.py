@@ -16,7 +16,6 @@ participant = Participant(
     profile.get("baseline_temperature")
 )
 
-observation_objects = []
 valid_observations = []
 for observation in observations:
     observation_object = Observation(
@@ -27,7 +26,6 @@ for observation in observations:
         observation.get("activity_level"),
         observation.get("signal_quality")
     )
-    observation_objects.append(observation_object)
 
     if observation_object.is_valid():
         valid_observations.append(observation_object)

@@ -16,7 +16,7 @@ def main():
     print("\nParticipant profile")
     print(profile)
     print("\nFirst three observations")
-    for observation in observations:
+    for observation in observations[:3]:
         print(observation)
 
     # Your program should convert these dictionaries into your own objects,
