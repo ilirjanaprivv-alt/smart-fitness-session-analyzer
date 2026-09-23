@@ -1,6 +1,6 @@
 from data_generator import generate_fitness_data
 from models import Participant, Observation, Session
-from analysis import classify_session
+from analysis import FitnessAnalyzer
 
 def create_session(scenario):
     profile, observations = generate_fitness_data(
@@ -36,31 +36,31 @@ def create_session(scenario):
 
 def test_resting():
     session = create_session("resting")
-    result = classify_session(session)
+    result = FitnessAnalyzer.classify_session(session)
 
     assert result == "resting"
 
 def test_moderate_activity():
     session = create_session("moderate_activity")
-    result = classify_session(session)
+    result = FitnessAnalyzer.classify_session(session)
 
     assert result == "moderate activity"
 
 def test_high_activity():
     session = create_session("high_activity")
-    result = classify_session(session)
+    result = FitnessAnalyzer.classify_session(session)
 
     assert result == "high activity"
 
 def test_recovery():
     session = create_session("recovery")
-    result = classify_session(session)
+    result = FitnessAnalyzer.classify_session(session)
 
     assert result == "recovering"
 
 def test_poor_quality():
     session = create_session("poor_quality")
-    result = classify_session(session)
+    result = FitnessAnalyzer.classify_session(session)
 
     assert result == "insufficient data"
 

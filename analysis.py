@@ -1,10 +1,108 @@
 class FitnessAnalyzer:
 
-    @staticmethod 
+    @staticmethod
     def has_enough_data(observations):
         return len(observations) >= 5
 
+    @staticmethod
+    def falling_heart_rate_and_activity(session):
+        observations = session.observations
+
+        if len(observations) < 6:
+            return False
+
+        first_three = observations[:3]
+        last_three = observations[-3:]
+
+        first_heart_rates = []
+        last_heart_rates = []
+
+        first_activity_levels = []
+        last_activity_levels = []
+
+        for observation in first_three:
+            first_heart_rates.append(observation.heart_rate)
+            first_activity_levels.append(observation.activity_level)
+
+        for observation in last_three:
+            last_heart_rates.append(observation.heart_rate)
+            last_activity_levels.append(observation.activity_level)
+
+        average_first_heart_rate = (
+            sum(first_heart_rates) / len(first_heart_rates)
+        )
+        average_last_heart_rate = (
+            sum(last_heart_rates) / len(last_heart_rates)
+        )
+
+        average_first_activity = (
+            sum(first_activity_levels) / len(first_activity_levels)
+        )
+        average_last_activity = (
+            sum(last_activity_levels) / len(last_activity_levels)
+        )
+
+        baseline = session.participant.baseline_heart_rate
+
+        started_active = (
+            average_first_activity > 0.5
+            and average_first_heart_rate > baseline + 20
+        )
+
+        heart_rate_falling = (
+            average_last_heart_rate < average_first_heart_rate
+        )
+
+        activity_falling = (
+            average_last_activity < average_first_activity
+        )
+
+        return (
+            started_active
+            and heart_rate_falling
+            and activity_falling
+        )
+
+    @staticmethod
+    def classify_session(session):
+        valid_observations = session.observations
+
+        if not FitnessAnalyzer.has_enough_data(valid_observations):
+            return "insufficient data"
+
+        if FitnessAnalyzer.falling_heart_rate_and_activity(session):
+            return "recovering"
+
+        activity_summary = summarize_activity_level(valid_observations)
+        avg_activity = activity_summary["average"]
+
+        if avg_activity < 0.25:
+            return "resting"
+        elif avg_activity < 0.67:
+            return "moderate activity"
+        else:
+            return "high activity"
+
+    @staticmethod
+    def explain_classification(session):
+        classification = FitnessAnalyzer.classify_session(session)
+
+        if classification == "recovering":
+            return (
+                "Heart rate and activity decreased toward "
+                "the end of the session."
+            )
+        elif classification == "resting":
+            return "The average activity level was low."
+        elif classification == "moderate activity":
+            return "The average activity level was in the moderate range."
+        elif classification == "high activity":
+            return "The average activity level was high."
+        else:
+            return "There were too few usable observations."
     
+
+
 def summarize_heart_rate(observations):
     heart_rates = []
     for observation in observations:
@@ -82,82 +180,6 @@ def compare_temperature_to_baseline(participant, observations):
         differences.append(observation.temperature - baseline)
     return differences
 
-
-def falling_heart_rate_and_activity(session):
-    observations = session.observations
-
-    if len(observations) < 6:
-        return False
-
-    first_three = observations[:3]
-    last_three = observations[-3:]
-
-    first_heart_rates = []
-    last_heart_rates = []
-
-    first_activity_levels = []
-    last_activity_levels = []
-
-    for observation in first_three:
-        first_heart_rates.append(observation.heart_rate)
-        first_activity_levels.append(observation.activity_level)
-
-    for observation in last_three:
-        last_heart_rates.append(observation.heart_rate)
-        last_activity_levels.append(observation.activity_level)
-
-    average_first_heart_rate = sum(first_heart_rates) / len(first_heart_rates)
-    average_last_heart_rate = sum(last_heart_rates) / len(last_heart_rates)
-
-    average_first_activity = sum(first_activity_levels) / len(first_activity_levels)
-    average_last_activity = sum(last_activity_levels) / len(last_activity_levels)
-
-    baseline = session.participant.baseline_heart_rate
-
-    started_active = (
-        average_first_activity > 0.5
-        and average_first_heart_rate > baseline + 20
-    )
-
-    heart_rate_falling = average_last_heart_rate < average_first_heart_rate
-    activity_falling = average_last_activity < average_first_activity
-
-    return started_active and heart_rate_falling and activity_falling
-
-
-def classify_session(session):
-    valid_observations = session.observations
-
-    if not FitnessAnalyzer.has_enough_data(valid_observations):
-        return "insufficient data"
-
-    if falling_heart_rate_and_activity(session):
-        return "recovering"
-
-    activity_summary = summarize_activity_level(valid_observations)
-    avg_activity = activity_summary["average"]
-
-    if avg_activity < 0.25:
-        return "resting"
-    elif avg_activity < 0.67:
-        return "moderate activity"
-    else:
-        return "high activity"
-
-def explain_classification(session):
-    classification = classify_session(session)
-
-    if classification == "recovering":
-        return "Heart rate and activity decreased toward the end of the session."
-    elif classification == "resting":
-        return "The average activity level was low."
-    elif classification == "moderate activity":
-        return "The average activity level was in the moderate range."
-    elif classification == "high activity":
-        return "The average activity level was high."
-    elif classification == "insufficient data":
-        return "There were too few usable observations."
-
 def analyze_session(session, total_observations):
     report = {
         "participant_id": session.participant.participant_id,
@@ -169,8 +191,8 @@ def analyze_session(session, total_observations):
         "total_observations": total_observations,
         "usable_observations": len(session.observations),
 
-        "classification": classify_session(session),
-        "classification_reason": explain_classification(session),
+        "classification": FitnessAnalyzer.classify_session(session),
+        "classification_reason": FitnessAnalyzer.explain_classification(session),
     }
 
     # Only calculate summaries if we have valid observations
