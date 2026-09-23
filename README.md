@@ -12,17 +12,20 @@ The program receives a participant profile and a list of sensor observations fro
 
 The possible classifications are:
 
-* resting
-* moderate activity
-* high activity
-* recovering
-* insufficient data
+- resting
+- moderate activity
+- high activity
+- recovering
+- insufficient data
+
+## Project Structure
 
 ## Project Structure
 
 ```text
 option_a_fitness/
 │
+├── .gitignore
 ├── README.md
 ├── main.py
 ├── models.py
@@ -52,21 +55,21 @@ It:
 
 Contains the main domain classes used by the application:
 
-* `Participant`
-* `Observation`
-* `Session`
+- `Participant`
+- `Observation`
+- `Session`
 
 ### `analysis.py`
 
 Contains the analysis logic, including:
 
-* the `FitnessAnalyzer` class;
-* summary calculations;
-* comparisons with baseline values;
-* recovery detection;
-* session classification;
-* creation of the structured result dictionary; and
-* console report presentation.
+- the `FitnessAnalyzer` class;
+- summary calculations;
+- comparisons with baseline values;
+- recovery detection;
+- session classification;
+- creation of the structured result dictionary; and
+- console report presentation.
 
 ### `data_generator.py`
 
@@ -76,11 +79,11 @@ Instructor-supplied file used to generate simulated participant profiles and sen
 
 Contains tests for the five required scenarios:
 
-* resting
-* moderate activity
-* high activity
-* recovery
-* poor-quality data
+- resting
+- moderate activity
+- high activity
+- recovery
+- poor-quality data
 
 ## Class Design
 
@@ -88,10 +91,10 @@ Contains tests for the five required scenarios:
 
 Represents one participant and stores the participant's personal reference values:
 
-* participant ID
-* baseline heart rate
-* baseline skin response
-* baseline temperature
+- participant ID
+- baseline heart rate
+- baseline skin response
+- baseline temperature
 
 The baseline heart rate is controlled through a property and is used as an example of encapsulation.
 
@@ -101,12 +104,12 @@ Represents one sensor observation window.
 
 Each observation contains:
 
-* timestamp
-* heart rate
-* skin response
-* temperature
-* activity level
-* signal quality
+- timestamp
+- heart rate
+- skin response
+- temperature
+- activity level
+- signal quality
 
 The `is_valid()` method checks whether the observation contains usable sensor values.
 
@@ -116,24 +119,30 @@ Represents one complete fitness session.
 
 A `Session` contains:
 
-* one `Participant`
-* a list of valid `Observation` objects
+- one `Participant`
+- a list of valid `Observation` objects
 
 The class is also the main example of composition in the project.
 
 ### `FitnessAnalyzer`
 
-Contains analysis-related behaviour that belongs to the analysis process rather than to one particular participant or observation.
+Represents the analysis behaviour used to evaluate a fitness session.
 
-The class currently contains the static method:
+The class contains static methods for:
+
+- checking whether enough observations are available;
+- detecting whether heart rate and activity are falling;
+- classifying the session; and
+- explaining the classification.
+
+The methods are static because they do not require a specific `FitnessAnalyzer` object or class-level state. They operate on the supplied observations or session.
+
+For example:
 
 ```python
 FitnessAnalyzer.has_enough_data(observations)
+FitnessAnalyzer.classify_session(session)
 ```
-
-This checks whether enough valid observations are available to classify the session.
-
-A static method is used because this operation does not require access to a particular `FitnessAnalyzer` object or class-level state.
 
 ## Object-Oriented Design
 
@@ -153,9 +162,9 @@ Composition was preferred over inheritance because these objects do not have an 
 
 For example:
 
-* a `Session` is not a type of `Participant`;
-* an `Observation` is not a type of `Session`;
-* a `Participant` is not a type of `Observation`.
+- a `Session` is not a type of `Participant`;
+- an `Observation` is not a type of `Session`;
+- a `Participant` is not a type of `Observation`.
 
 Instead, the objects naturally work together through "has-a" relationships.
 
@@ -185,12 +194,12 @@ Each `Observation` is checked before it is added to the session.
 
 An observation is considered usable when:
 
-* `timestamp` is an integer greater than or equal to `0`;
-* `heart_rate` is between `35` and `205` beats per minute;
-* `skin_response` is `0` or greater;
-* `temperature` is between `25` and `42` degrees Celsius;
-* `activity_level` is between `0` and `1`;
-* `signal_quality` is between `0.60` and `1`.
+- `timestamp` is an integer greater than or equal to `0`;
+- `heart_rate` is numeric and between `35` and `205` beats per minute;
+- `skin_response` is numeric and `0` or greater;
+- `temperature` is numeric and between `25` and `42` degrees Celsius;
+- `activity_level` is numeric and between `0` and `1`;
+- `signal_quality` is numeric and between `0.60` and `1`.
 
 A signal-quality threshold of `0.60` was chosen to reject measurements with very poor sensor reliability.
 
@@ -200,17 +209,17 @@ Invalid observations are excluded from the analysis.
 
 For the usable observations, the program calculates average, minimum, and maximum values for:
 
-* heart rate;
-* skin response;
-* temperature;
-* activity level; and
-* signal quality.
+- heart rate;
+- skin response;
+- temperature;
+- activity level; and
+- signal quality.
 
 The program also compares:
 
-* heart rate with baseline heart rate;
-* skin response with baseline skin response; and
-* temperature with baseline temperature.
+- heart rate with baseline heart rate;
+- skin response with baseline skin response; and
+- temperature with baseline temperature.
 
 These comparisons are stored as differences from the participant's personal baseline.
 
@@ -228,12 +237,14 @@ The program compares measurements near the beginning of the session with measure
 
 A session is considered to show recovery when:
 
-* the participant started with elevated activity;
-* the starting heart rate was clearly above the participant's baseline;
-* average heart rate is lower near the end of the session; and
-* average activity level is lower near the end of the session.
+- the participant started with elevated activity;
+- the starting heart rate was clearly above the participant's baseline;
+- average heart rate is lower near the end of the session; and
+- average activity level is lower near the end of the session.
 
 The implementation compares the first three usable observations with the last three usable observations to reduce the effect of one unusual measurement.
+
+The session must contain at least six usable observations before this recovery comparison is performed.
 
 ### Resting
 
@@ -285,18 +296,18 @@ The analysis is returned as a Python dictionary.
 
 The dictionary contains information such as:
 
-* participant ID;
-* baseline values;
-* total number of observations;
-* number of usable observations;
-* classification;
-* explanation of the classification;
-* heart-rate summary;
-* skin-response summary;
-* temperature summary;
-* activity-level summary;
-* signal-quality summary; and
-* differences from baseline values.
+- participant ID;
+- baseline values;
+- total number of observations;
+- number of usable observations;
+- classification;
+- explanation of the classification;
+- heart-rate summary;
+- skin-response summary;
+- temperature summary;
+- activity-level summary;
+- signal-quality summary; and
+- differences from baseline values.
 
 ## Example Output
 
@@ -350,12 +361,13 @@ The project includes tests for all five required scenarios.
 Run the tests with:
 
 ```bash
-python tests.py
+python3 tests.py
 ```
-or
+
+On systems where Python is started with `python` instead of `python3`, use:
 
 ```bash
-python3 tests.py
+python tests.py
 ```
 
 The expected output is:
@@ -391,24 +403,25 @@ cd smart-fitness-session-analyzer
 Run the application:
 
 ```bash
-python main.py
+python3 main.py
 ```
 
-or 
+On systems where Python is started with `python` instead of `python3`, use:
 
 ```bash
-python3 main.py
+python main.py
 ```
 
 Run the tests with:
 
 ```bash
-python tests.py
+python3 tests.py
 ```
-or
+
+or:
 
 ```bash
-python3 tests.py
+python tests.py
 ```
 
 ## Requirements
@@ -419,9 +432,8 @@ The project uses only the Python standard library and the instructor-supplied da
 
 ## Known Limitations
 
-* The program analyzes simulated fitness data and is not intended for medical use.
-* Classification thresholds are manually chosen for the supplied simulated dataset.
-* Recovery detection uses a simple comparison between measurements near the beginning and end of a session.
-* Invalid observations are excluded rather than repaired.
-* The application uses console output only.
-* The program does not use external APIs, databases, graphical interfaces, or machine-learning models.
+- Classification thresholds are manually chosen for the supplied simulated dataset.
+- Recovery detection uses a simple comparison between the first three and last three usable observations.
+- Invalid observations are excluded rather than repaired.
+- The application uses console output only.
+- The program does not use external APIs, databases, graphical interfaces, or machine-learning models.
