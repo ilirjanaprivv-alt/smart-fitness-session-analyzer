@@ -1,7 +1,9 @@
 # Smart Fitness Session Analyzer
 
 **Selected option:** Option A – Smart Fitness Session Analyzer
+
 **Student name:** Ilirijana Krasniqi
+
 **Student number:** 385512
 
 ## Project Description
