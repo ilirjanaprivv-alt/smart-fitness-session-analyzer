@@ -352,6 +352,11 @@ Run the tests with:
 ```bash
 python tests.py
 ```
+or
+
+```bash
+python3 tests.py
+```
 
 The expected output is:
 
@@ -389,10 +394,21 @@ Run the application:
 python main.py
 ```
 
+or 
+
+```bash
+python3 main.py
+```
+
 Run the tests with:
 
 ```bash
 python tests.py
+```
+or
+
+```bash
+python3 tests.py
 ```
 
 ## Requirements
