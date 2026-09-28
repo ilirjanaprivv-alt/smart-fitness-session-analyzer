@@ -27,7 +27,7 @@ def assert_raises(exception_type, function, *args):
 
 
 def test_valid_case():
-    participants = load_participants(
+    participants, participant_rejected_records = load_participants(
         PARTICIPANTS_FILE
     )
 
@@ -59,7 +59,7 @@ def test_valid_case():
 
 
 def test_classifications():
-    participants = load_participants(
+    participants, participant_rejected_records = load_participants(
         PARTICIPANTS_FILE
     )
 
@@ -86,7 +86,7 @@ def test_classifications():
 
 
 def test_invalid_case():
-    participants = load_participants(
+    participants, participant_rejected_records = load_participants(
         PARTICIPANTS_FILE
     )
 
@@ -111,7 +111,7 @@ def test_invalid_case():
 
 
 def test_missing_file_case():
-    participants = load_participants(
+    participants, participant_rejected_records = load_participants(
         PARTICIPANTS_FILE
     )
 

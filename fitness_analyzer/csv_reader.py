@@ -7,28 +7,125 @@ from fitness_analyzer.exceptions import (InvalidIdentifierError, InvalidRecordEr
 
 def load_participants(filename):
     participants = {}
+    rejected_records = []
+
+    required_fields = [
+        "participant_id",
+        "name",
+        "baseline_heart_rate",
+        "baseline_skin_response",
+        "baseline_temperature"
+    ]
 
     try:
         with open(filename, encoding="utf-8", newline="") as csvfile:
             reader = csv.DictReader(csvfile)
 
             for row_number, row in enumerate(reader, start=2):
-                try:
-                    participant_id = row["participant_id"]
-                    name = row["name"]
 
+                # Check for unexpected extra columns
+                if None in row:
+                    rejected_records.append({
+                        "filename": str(filename),
+                        "row": row_number,
+                        "field": "row",
+                        "reason": "Unexpected number of columns"
+                    })
+                    continue
+
+                # Check for missing fields or values
+                missing_field = None
+
+                for field in required_fields:
+                    if (
+                        field not in row
+                        or row[field] is None
+                        or row[field].strip() == ""
+                    ):
+                        missing_field = field
+                        break
+
+                if missing_field is not None:
+                    rejected_records.append({
+                        "filename": str(filename),
+                        "row": row_number,
+                        "field": missing_field,
+                        "reason": "Missing required value"
+                    })
+                    continue
+
+                participant_id = row["participant_id"]
+                name = row["name"]
+
+                # Validate participant ID
+                try:
+                    validate_participant_id(participant_id)
+
+                except InvalidIdentifierError as error:
+                    rejected_records.append({
+                        "filename": str(filename),
+                        "row": row_number,
+                        "field": "participant_id",
+                        "reason": str(error)
+                    })
+                    continue
+
+                # Convert baseline heart rate
+                try:
                     baseline_heart_rate = int(
                         row["baseline_heart_rate"]
                     )
+
+                except ValueError:
+                    rejected_records.append({
+                        "filename": str(filename),
+                        "row": row_number,
+                        "field": "baseline_heart_rate",
+                        "reason": (
+                            "Invalid numeric value: "
+                            f"{row['baseline_heart_rate']}"
+                        )
+                    })
+                    continue
+
+                # Convert baseline skin response
+                try:
                     baseline_skin_response = float(
                         row["baseline_skin_response"]
                     )
+
+                except ValueError:
+                    rejected_records.append({
+                        "filename": str(filename),
+                        "row": row_number,
+                        "field": "baseline_skin_response",
+                        "reason": (
+                            "Invalid numeric value: "
+                            f"{row['baseline_skin_response']}"
+                        )
+                    })
+                    continue
+
+                # Convert baseline temperature
+                try:
                     baseline_temperature = float(
                         row["baseline_temperature"]
                     )
 
-                    validate_participant_id(participant_id)
+                except ValueError:
+                    rejected_records.append({
+                        "filename": str(filename),
+                        "row": row_number,
+                        "field": "baseline_temperature",
+                        "reason": (
+                            "Invalid numeric value: "
+                            f"{row['baseline_temperature']}"
+                        )
+                    })
+                    continue
 
+                # Create Participant object
+                try:
                     participant = Participant(
                         participant_id,
                         name,
@@ -37,19 +134,16 @@ def load_participants(filename):
                         baseline_temperature
                     )
 
-                    participants[participant_id] = participant
-
-                except KeyError as error:
-                    print(
-                        f"Missing field {error} in "
-                        f"{filename}, row {row_number}"
-                    )
-
                 except ValueError as error:
-                    print(
-                        f"Invalid value in "
-                        f"{filename}, row {row_number}: {error}"
-                    )
+                    rejected_records.append({
+                        "filename": str(filename),
+                        "row": row_number,
+                        "field": "baseline_heart_rate",
+                        "reason": str(error)
+                    })
+                    continue
+
+                participants[participant_id] = participant
 
     except FileNotFoundError:
         print(f"File not found: {filename}")
@@ -60,8 +154,7 @@ def load_participants(filename):
     except csv.Error as error:
         print(f"CSV error in {filename}: {error}")
 
-    return participants
-
+    return participants, rejected_records
 
 def load_sessions(filename, participants):
     sessions = {}

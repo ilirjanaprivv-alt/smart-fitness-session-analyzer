@@ -44,10 +44,10 @@ def main():
     session_files = args.sessions
     output_dir = args.output
 
-    participants = load_participants(participants_file)
-
+    participants, participant_rejected_records = load_participants(participants_file)
+    
     all_sessions = {}
-    all_rejected_records = []
+    all_rejected_records = list(participant_rejected_records)
     all_session_row_counts = {}
 
     for session_file in session_files:
