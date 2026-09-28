@@ -1,16 +1,4 @@
 """
-7. **Lag lesing av `participants.csv`.** Fil: `fitness_analyzer/csv_reader.py`. 
-Bruk `with open(..., encoding="utf-8", newline="")` og Pythons `csv`module, akkurat som oppgaven sier. 
-Hver rad skal konverteres fra strings til riktige typer, for eksempel `int`/`float`, valideres og bli 
-et `Participant`objekt. Det er praktisk å lagre participants i en dictionary etter ID, 
-omtrent `{ "P001": participant_object }`. Forelesning: `class1.py` for dictionaries, `class2.py` for loops. 
-**Ingen av forelesningene du har lastet opp går ordentlig gjennom `csv`modulen**, så her er det selve Assignment II som er hovedkilden.
-
-8. **Lag lesing av session-CSV.** Fil: `fitness_analyzer/csv_reader.py`. 
-Les `fitness_sessions.csv` og sørg også for at programmet kan behandle `fitness_sessions_invalid.csv`. 
-Konverter `timestamp`, `heart_rate`, `skin_response`, `temperature`, `activity_level` og `signal_quality` 
-til riktige datatyper. 
-Forelesning: samme som punkt 7 pluss **Error Handling in Python** for konverteringsfeil.
 
 9. **Valider hver CSV-rad og fortsett når én rad er dårlig.** Fil: `fitness_analyzer/csv_reader.py` sammen med `validation.py` og `exceptions.py`. 
 Her skal du oppdage manglende felt, feil datatype, ugyldig ID, ukjent participant, umulige målinger og dårlig signal. 
@@ -31,19 +19,11 @@ Forelesning: `class1.py` for dictionaries/lists og OOP-forelesningene for compos
 Assignment II krever eksplisitt grouping og kobling til eksisterende participant.
 
 """
-"""
-**Lag lesing av session-CSV.** Fil: `fitness_analyzer/csv_reader.py`. 
-Les `fitness_sessions.csv` og sørg også for at programmet kan behandle `fitness_sessions_invalid.csv`. 
-Konverter `timestamp`, `heart_rate`, `skin_response`, `temperature`, `activity_level` og `signal_quality` 
-til riktige datatyper. 
-Forelesning: samme som punkt 7 pluss **Error Handling in Python** for konverteringsfeil.
-
-"""
 
 import csv
 
 from fitness_analyzer.models import Participant, Observation, Session
-from fitness_analyzer.validation import validate_participant, validate_participant_id
+from fitness_analyzer.validation import (validate_participant_id, validate_session_id)
 
 def load_participants(filename):
     participants = {}
@@ -74,10 +54,50 @@ def load_participants(filename):
     return participants
 
 
+def load_sessions(filename, participants):
+    sessions = {}
 
+    with open(filename, encoding="utf-8", newline="") as csvfile:
+        reader = csv.DictReader(csvfile)
 
+        for row in reader:
+            session_id = row["session_id"]
+            participant_id = row["participant_id"]
 
-    
+            validate_session_id(session_id)
+            validate_participant_id(participant_id)
 
-    
+            if participant_id not in participants:
+                continue
 
+            participant = participants[participant_id]
+
+            timestamp = int(row["timestamp"])
+            heart_rate = float(row["heart_rate"])
+            skin_response = float(row["skin_response"])
+            temperature = float(row["temperature"])
+            activity_level = float(row["activity_level"])
+            signal_quality = float(row["signal_quality"])
+
+            observation = Observation(
+                timestamp,
+                heart_rate,
+                skin_response,
+                temperature,
+                activity_level,
+                signal_quality
+            )
+
+            if not observation.is_valid():
+                continue
+
+            if session_id not in sessions:
+                sessions[session_id] = Session(
+                    session_id,
+                    participant,
+                    []
+                )
+
+            sessions[session_id].observations.append(observation)
+
+    return sessions
