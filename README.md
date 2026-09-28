@@ -50,7 +50,7 @@ The official CSV files in `data/` are used as input and are not modified by the 
 - `models.py` defines `Participant`, `Observation`, and `Session`.
 - `validation.py` validates participant IDs, session IDs, numeric ranges, and signal quality.
 - `exceptions.py` defines the custom exceptions `InvalidIdentifierError` and `InvalidRecordError`.
-- `csv_reader.py` reads CSV files, converts values to suitable types, validates rows, records rejected session rows, groups observations by session ID, and connects sessions to participants.
+- `csv_reader.py` reads CSV files, converts values to suitable types, validates rows, records rejected rows, groups observations by session ID, and connects sessions to participants.
 - `analysis.py` calculates summaries, compares measurements with participant baselines, classifies sessions, and returns a structured dictionary for each session.
 - `reporting.py` creates the output directory and writes the three required report files.
 - `main.py` handles command-line arguments and coordinates the complete program flow.
@@ -85,7 +85,7 @@ The program uses `re.fullmatch()` for both identifier checks.
 
 ## Record Validation
 
-Session rows are rejected when they contain missing required values, unexpected extra columns, values that cannot be converted to the required numeric type, invalid identifiers, unknown participant IDs, out-of-range measurements, or poor signal quality.
+Input rows are rejected when they contain missing required values, unexpected row lengths, values that cannot be converted to the required type, invalid identifiers, unknown participant IDs, out-of-range measurements, or poor signal quality.
 
 Accepted measurement ranges are:
 
@@ -98,7 +98,7 @@ Accepted measurement ranges are:
 
 A signal-quality value below `0.60` is treated as a data-quality problem and the row is rejected.
 
-For each rejected session row, the program records:
+For each rejected row, the program records:
 
 - source filename
 - row number
@@ -142,7 +142,7 @@ Contains a readable section for each analyzed session, including baseline values
 
 ### `rejected_records.txt`
 
-Lists rejected session rows with the source filename, row number, field, and reason.
+Lists rejected input rows with the source filename, row number, field, and reason.
 
 The files are opened in write mode, so running the program again produces predictable output without requiring manual cleanup.
 
