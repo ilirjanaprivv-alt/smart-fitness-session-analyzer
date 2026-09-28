@@ -43,6 +43,7 @@ def write_analysis_summary(reports, output_dir):
 
     return summary_file
 
+
 def write_analysis_report(reports, output_dir): 
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
@@ -185,3 +186,34 @@ def write_analysis_report(reports, output_dir):
             file.write("\n" + "=" * 40 + "\n\n")
 
     return report_file
+
+
+def write_rejected_records(rejected_records, output_dir):
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    rejected_file = output_path / "rejected_records.txt"
+
+    with open(rejected_file, "w", encoding="utf-8") as file:
+
+        if len(rejected_records) == 0:
+            file.write("No rejected records.\n")
+            return rejected_file
+
+        for record in rejected_records:
+            file.write("Rejected record:\n")
+            file.write(
+                f"Filename: {record['filename']}\n"
+            )
+            file.write(
+                f"Row: {record['row']}\n"
+            )
+            file.write(
+                f"Field: {record['field']}\n"
+            )
+            file.write(
+                f"Reason: {record['reason']}\n"
+            )
+            file.write("-" * 40 + "\n")
+
+    return rejected_file
