@@ -1,37 +1,95 @@
-from data_generator import generate_fitness_data
-from fitness_analyzer.models import Participant, Observation, Session
-from fitness_analyzer.analysis import analyze_session, print_report
+import argparse
+from pathlib import Path
 
-profile, observations = generate_fitness_data(
-    participant_id="P001",
-    scenario="recovery",
-    seed=42,
-    number_of_windows=10
-)
+from fitness_analyzer.csv_reader import (load_participants, load_sessions)
+from fitness_analyzer.analysis import analyze_session
+from fitness_analyzer.reporting import (write_analysis_summary, write_analysis_report, write_rejected_records)
 
-participant = Participant(
-    profile.get("participant_id"),
-    profile.get("name"),
-    profile.get("baseline_heart_rate"),
-    profile.get("baseline_skin_response"),
-    profile.get("baseline_temperature")
-)
 
-valid_observations = []
-for observation in observations:
-    observation_object = Observation(
-        observation.get("timestamp"),
-        observation.get("heart_rate"),
-        observation.get("skin_response"),
-        observation.get("temperature"),
-        observation.get("activity_level"),
-        observation.get("signal_quality")
+def parse_arguments():
+    parser = argparse.ArgumentParser(description="Smart Fitness Session Analyzer")
+
+    parser.add_argument(
+        "--profiles",
+        type=Path,
+        default=Path("data/participants.csv"),
+        help="Path to participant CSV file"
     )
 
-    if observation_object.is_valid():
-        valid_observations.append(observation_object)
+    parser.add_argument(
+        "--sessions",
+        type=Path,
+        nargs="+",
+        default=[
+            Path("data/fitness_sessions.csv"),
+            Path("data/fitness_sessions_invalid.csv")
+        ],
+        help="Path to one or more fitness session CSV files"
+    )
 
-session = Session(participant, valid_observations)
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=Path("output"),
+        help="Path to output directory"
+    )
 
-report = analyze_session(session, len(observations))
-print_report(report)
+    return parser.parse_args()
+
+
+def main():
+    args = parse_arguments()
+
+    participants_file = args.profiles
+    session_files = args.sessions
+    output_dir = args.output
+
+    participants = load_participants(participants_file)
+
+    all_sessions = {}
+    all_rejected_records = []
+
+    for session_file in session_files:
+        sessions, rejected_records = load_sessions(session_file, participants)
+
+        all_rejected_records.extend(rejected_records)
+
+        for session_id, session in sessions.items():
+            if session_id not in all_sessions:
+                all_sessions[session_id] = session
+
+            else:
+                all_sessions[session_id].observations.extend(
+                    session.observations
+                )
+
+    reports = []
+
+    for session in all_sessions.values():
+        report = analyze_session(session, len(session.observations))
+
+        reports.append(report)
+
+    summary_file = write_analysis_summary(reports, output_dir)
+
+    report_file = write_analysis_report(reports, output_dir)
+
+    rejected_file = write_rejected_records(all_rejected_records, output_dir)
+
+    accepted_rows = 0
+
+    for session in all_sessions.values():
+        accepted_rows += len(session.observations)
+
+    print("Analysis completed.")
+    print("Accepted rows:", accepted_rows)
+    print("Rejected rows:", len(all_rejected_records))
+
+    print("\nCreated files:")
+    print(summary_file)
+    print(report_file)
+    print(rejected_file)
+
+
+if __name__ == "__main__":
+    main()

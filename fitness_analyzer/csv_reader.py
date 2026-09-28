@@ -1,8 +1,43 @@
 import csv
 
-from fitness_analyzer.models import Observation, Session
+from fitness_analyzer.models import Participant, Observation, Session
 from fitness_analyzer.validation import (validate_participant_id, validate_session_id, validate_measurement)
 from fitness_analyzer.exceptions import InvalidIdentifierError, InvalidRecordError
+
+def load_participants(filename):
+    participants = {}
+
+    with open(filename, encoding="utf-8", newline="") as csvfile:
+        reader = csv.DictReader(csvfile)
+
+        for row in reader:
+            participant_id = row["participant_id"]
+            name = row["name"]
+
+            baseline_heart_rate = int(
+                row["baseline_heart_rate"]
+            )
+            baseline_skin_response = float(
+                row["baseline_skin_response"]
+            )
+            baseline_temperature = float(
+                row["baseline_temperature"]
+            )
+
+            validate_participant_id(participant_id)
+
+            participant = Participant(
+                participant_id,
+                name,
+                baseline_heart_rate,
+                baseline_skin_response,
+                baseline_temperature
+            )
+
+            participants[participant_id] = participant
+
+    return participants
+
 
 def load_sessions(filename, participants):
     sessions = {}

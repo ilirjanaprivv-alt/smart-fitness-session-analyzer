@@ -1,5 +1,4 @@
 import re
-from fitness_analyzer.exceptions import InvalidIdentifierError
 
 from fitness_analyzer.exceptions import (InvalidIdentifierError, InvalidRecordError)
 
