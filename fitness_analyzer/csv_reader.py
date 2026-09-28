@@ -1,96 +1,162 @@
-"""
-
-9. **Valider hver CSV-rad og fortsett når én rad er dårlig.** Fil: `fitness_analyzer/csv_reader.py` sammen med `validation.py` og `exceptions.py`. 
-Her skal du oppdage manglende felt, feil datatype, ugyldig ID, ukjent participant, umulige målinger og dårlig signal. 
-En dårlig rad skal ikke nødvendigvis krasje hele programmet; den registreres som rejected og programmet 
-går videre. Forelesning: **Error Handling in Python**, særlig focused handlers. 
-Forelesningen anbefaler konkrete `except ValueError:` osv. fremfor brede `except:`. Oppgaven sier det samme.
-
-10. **Registrer informasjon om alle rejected rows.**  Fil: sannsynligvis `fitness_analyzer/csv_reader.py`. 
-For hver rejected rad trenger vi å lagre minst `source filename`, `row number`, `field` og `reason`. 
-Dette kan først være dictionaries i en liste. Eksempelidé: `{"filename": ..., "row": ..., "field": ..., 
-"reason": ...}`. Forelesning: `class1.py` for dictionaries/lists og `class2.py` for loops. Dette er et direkte Assignment II-krav.
-
-11. **Gruppér observations etter `session_id`.** Fil: `fitness_analyzer/csv_reader.py`. 
-Flere CSV-rader tilhører samme fitness-session. 
-De må samles slik at vi ender med ett `Session`objekt med mange `Observation`objekter. 
-Sessionen skal også kobles til riktig eksisterende `Participant`. 
-Forelesning: `class1.py` for dictionaries/lists og OOP-forelesningene for composition. 
-Assignment II krever eksplisitt grouping og kobling til eksisterende participant.
-
-"""
-
 import csv
 
-from fitness_analyzer.models import Participant, Observation, Session
-from fitness_analyzer.validation import (validate_participant_id, validate_session_id)
-
-def load_participants(filename):
-    participants = {}
-
-    with open(filename, encoding="utf-8", newline="") as csvfile:
-        reader = csv.DictReader(csvfile)
-
-        for row in reader:
-            participant_id = row["participant_id"]
-            name = row["name"]
-
-            baseline_heart_rate = int(row["baseline_heart_rate"])
-            baseline_skin_response = float(row["baseline_skin_response"])
-            baseline_temperature = float(row["baseline_temperature"])
-
-            validate_participant_id(participant_id)
-
-            participant = Participant(
-                participant_id,
-                name,
-                baseline_heart_rate,
-                baseline_skin_response,
-                baseline_temperature
-            )
-
-            participants[participant_id] = participant
-
-    return participants
-
+from fitness_analyzer.models import Observation, Session
+from fitness_analyzer.validation import (validate_participant_id, validate_session_id, validate_measurement)
+from fitness_analyzer.exceptions import InvalidIdentifierError, InvalidRecordError
 
 def load_sessions(filename, participants):
     sessions = {}
+    rejected_records = []
+
+    required_fields = [
+        "session_id",
+        "participant_id",
+        "timestamp",
+        "heart_rate",
+        "skin_response",
+        "temperature",
+        "activity_level",
+        "signal_quality"
+    ]
+
+    numeric_fields = {
+        "timestamp": int,
+        "heart_rate": float,
+        "skin_response": float,
+        "temperature": float,
+        "activity_level": float,
+        "signal_quality": float
+    }
 
     with open(filename, encoding="utf-8", newline="") as csvfile:
         reader = csv.DictReader(csvfile)
 
-        for row in reader:
+        for row_number, row in enumerate(reader, start=2):
+
+            # 1. Check for unexpected extra columns
+            if None in row:
+                rejected_records.append({
+                    "filename": str(filename),
+                    "row": row_number,
+                    "field": "row",
+                    "reason": "Unexpected number of columns"
+                })
+                continue
+
+            # 2. Check for missing fields or values
+            missing_field = None
+
+            for field in required_fields:
+                if (
+                    field not in row
+                    or row[field] is None
+                    or row[field].strip() == ""
+                ):
+                    missing_field = field
+                    break
+
+            if missing_field is not None:
+                rejected_records.append({
+                    "filename": str(filename),
+                    "row": row_number,
+                    "field": missing_field,
+                    "reason": "Missing required value"
+                })
+                continue
+
             session_id = row["session_id"]
             participant_id = row["participant_id"]
 
-            validate_session_id(session_id)
-            validate_participant_id(participant_id)
+            # 3. Validate session ID
+            try:
+                validate_session_id(session_id)
 
+            except InvalidIdentifierError as error:
+                rejected_records.append({
+                    "filename": str(filename),
+                    "row": row_number,
+                    "field": "session_id",
+                    "reason": str(error)
+                })
+                continue
+
+            # 4. Validate participant ID
+            try:
+                validate_participant_id(participant_id)
+
+            except InvalidIdentifierError as error:
+                rejected_records.append({
+                    "filename": str(filename),
+                    "row": row_number,
+                    "field": "participant_id",
+                    "reason": str(error)
+                })
+                continue
+
+            # 5. Check that participant exists
             if participant_id not in participants:
+                rejected_records.append({
+                    "filename": str(filename),
+                    "row": row_number,
+                    "field": "participant_id",
+                    "reason": f"Unknown participant ID: {participant_id}"
+                })
                 continue
 
             participant = participants[participant_id]
 
-            timestamp = int(row["timestamp"])
-            heart_rate = float(row["heart_rate"])
-            skin_response = float(row["skin_response"])
-            temperature = float(row["temperature"])
-            activity_level = float(row["activity_level"])
-            signal_quality = float(row["signal_quality"])
+            # 6. Convert numeric values
+            converted_values = {}
+            conversion_failed = False
 
-            observation = Observation(
-                timestamp,
-                heart_rate,
-                skin_response,
-                temperature,
-                activity_level,
-                signal_quality
-            )
+            for field, converter in numeric_fields.items():
+                try:
+                    converted_values[field] = converter(row[field])
 
-            if not observation.is_valid():
+                except ValueError:
+                    rejected_records.append({
+                        "filename": str(filename),
+                        "row": row_number,
+                        "field": field,
+                        "reason": f"Invalid numeric value: {row[field]}"
+                    })
+                    conversion_failed = True
+                    break
+
+            if conversion_failed:
                 continue
 
+            # 7. Validate numeric ranges and signal quality
+            measurement_failed = False
+
+            for field, value in converted_values.items():
+                try:
+                    validate_measurement(field, value)
+
+                except InvalidRecordError as error:
+                    rejected_records.append({
+                        "filename": str(filename),
+                        "row": row_number,
+                        "field": field,
+                        "reason": str(error)
+                    })
+                    measurement_failed = True
+                    break
+
+            if measurement_failed:
+                continue
+
+            # 8. Create Observation object
+            observation = Observation(
+                converted_values["timestamp"],
+                converted_values["heart_rate"],
+                converted_values["skin_response"],
+                converted_values["temperature"],
+                converted_values["activity_level"],
+                converted_values["signal_quality"]
+            )
+
+            # 9. Create session if this is its first observation
             if session_id not in sessions:
                 sessions[session_id] = Session(
                     session_id,
@@ -98,6 +164,7 @@ def load_sessions(filename, participants):
                     []
                 )
 
+            # 10. Add observation to the correct session
             sessions[session_id].observations.append(observation)
 
-    return sessions
+    return sessions, rejected_records
