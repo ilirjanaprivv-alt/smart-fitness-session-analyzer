@@ -1,6 +1,6 @@
 from data_generator import generate_fitness_data
-from models import Participant, Observation, Session
-from analysis import FitnessAnalyzer
+from fitness_analyzer.models import Participant, Observation, Session
+from fitness_analyzer.analysis import FitnessAnalyzer
 
 def create_session(scenario):
     profile, observations = generate_fitness_data(

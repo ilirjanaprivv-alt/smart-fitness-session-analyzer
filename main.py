@@ -1,6 +1,6 @@
 from data_generator import generate_fitness_data
-from models import Participant, Observation, Session
-from analysis import analyze_session, print_report
+from fitness_analyzer.models import Participant, Observation, Session
+from fitness_analyzer.analysis import analyze_session, print_report
 
 profile, observations = generate_fitness_data(
     participant_id="P001",
