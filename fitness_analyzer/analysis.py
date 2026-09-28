@@ -182,6 +182,7 @@ def compare_temperature_to_baseline(participant, observations):
 
 def analyze_session(session, total_observations):
     report = {
+        "session_id": session.session_id,
         "participant_id": session.participant.participant_id,
 
         "baseline_heart_rate": session.participant.baseline_heart_rate,
@@ -242,6 +243,9 @@ def analyze_session(session, total_observations):
 
 def print_report(report):
     print("\n--- FITNESS SESSION REPORT ---")
+
+    print("\nSession:")
+    print("Session ID:", report["session_id"])
 
     print("\nParticipant:")
     print("Participant ID:", report["participant_id"])
