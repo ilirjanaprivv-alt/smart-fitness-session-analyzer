@@ -11,6 +11,7 @@ profile, observations = generate_fitness_data(
 
 participant = Participant(
     profile.get("participant_id"),
+    profile.get("name"),
     profile.get("baseline_heart_rate"),
     profile.get("baseline_skin_response"),
     profile.get("baseline_temperature")
