@@ -1,0 +1,230 @@
+--- FITNESS SESSION REPORT ---
+
+Session:
+Session ID: FIT-2026-001
+
+Participant:
+Participant ID: P001
+Baseline Heart Rate: 68
+Baseline Skin Response: 1.2
+Baseline Temperature: 32.4
+
+Observations:
+Total Observations: 6
+Usable Observations: 6
+
+Classification:
+resting
+Explanation: The average activity level was low.
+
+Heart Rate:
+Average: 68.83
+Minimum: 68.0
+Maximum: 70.0
+
+Skin Response:
+Average: 1.19
+Minimum: 1.17
+Maximum: 1.22
+
+Temperature:
+Average: 32.43
+Minimum: 32.4
+Maximum: 32.5
+
+Activity Level:
+Average: 0.09
+Minimum: 0.07
+Maximum: 0.12
+
+Signal Quality:
+Average: 0.97
+Minimum: 0.96
+Maximum: 0.98
+
+========================================
+
+--- FITNESS SESSION REPORT ---
+
+Session:
+Session ID: FIT-2026-002
+
+Participant:
+Participant ID: P002
+Baseline Heart Rate: 74
+Baseline Skin Response: 1.45
+Baseline Temperature: 32.7
+
+Observations:
+Total Observations: 6
+Usable Observations: 6
+
+Classification:
+moderate activity
+Explanation: The average activity level was in the moderate range.
+
+Heart Rate:
+Average: 102.0
+Minimum: 78.0
+Maximum: 118.0
+
+Skin Response:
+Average: 2.01
+Minimum: 1.55
+Maximum: 2.4
+
+Temperature:
+Average: 33.13
+Minimum: 32.8
+Maximum: 33.4
+
+Activity Level:
+Average: 0.5
+Minimum: 0.22
+Maximum: 0.68
+
+Signal Quality:
+Average: 0.94
+Minimum: 0.93
+Maximum: 0.96
+
+========================================
+
+--- FITNESS SESSION REPORT ---
+
+Session:
+Session ID: FIT-2026-003
+
+Participant:
+Participant ID: P003
+Baseline Heart Rate: 63
+Baseline Skin Response: 1.1
+Baseline Temperature: 32.3
+
+Observations:
+Total Observations: 6
+Usable Observations: 6
+
+Classification:
+high activity
+Explanation: The average activity level was high.
+
+Heart Rate:
+Average: 132.5
+Minimum: 72.0
+Maximum: 162.0
+
+Skin Response:
+Average: 3.24
+Minimum: 1.3
+Maximum: 4.2
+
+Temperature:
+Average: 33.53
+Minimum: 32.5
+Maximum: 34.1
+
+Activity Level:
+Average: 0.75
+Minimum: 0.25
+Maximum: 0.94
+
+Signal Quality:
+Average: 0.94
+Minimum: 0.92
+Maximum: 0.97
+
+========================================
+
+--- FITNESS SESSION REPORT ---
+
+Session:
+Session ID: FIT-2026-004
+
+Participant:
+Participant ID: P001
+Baseline Heart Rate: 68
+Baseline Skin Response: 1.2
+Baseline Temperature: 32.4
+
+Observations:
+Total Observations: 6
+Usable Observations: 6
+
+Classification:
+recovering
+Explanation: Heart rate and activity decreased toward the end of the session.
+
+Heart Rate:
+Average: 113.17
+Minimum: 72.0
+Maximum: 151.0
+
+Skin Response:
+Average: 2.58
+Minimum: 1.35
+Maximum: 3.9
+
+Temperature:
+Average: 33.28
+Minimum: 32.6
+Maximum: 33.9
+
+Activity Level:
+Average: 0.55
+Minimum: 0.18
+Maximum: 0.92
+
+Signal Quality:
+Average: 0.96
+Minimum: 0.94
+Maximum: 0.97
+
+========================================
+
+--- FITNESS SESSION REPORT ---
+
+Session:
+Session ID: FIT-2026-101
+
+Participant:
+Participant ID: P001
+Baseline Heart Rate: 68
+Baseline Skin Response: 1.2
+Baseline Temperature: 32.4
+
+Observations:
+Total Observations: 5
+Usable Observations: 1
+
+Classification:
+insufficient data
+Explanation: There were too few usable observations.
+
+Heart Rate:
+Average: 72.0
+Minimum: 72.0
+Maximum: 72.0
+
+Skin Response:
+Average: 1.3
+Minimum: 1.3
+Maximum: 1.3
+
+Temperature:
+Average: 32.5
+Minimum: 32.5
+Maximum: 32.5
+
+Activity Level:
+Average: 0.1
+Minimum: 0.1
+Maximum: 0.1
+
+Signal Quality:
+Average: 0.96
+Minimum: 0.96
+Maximum: 0.96
+
+========================================
+

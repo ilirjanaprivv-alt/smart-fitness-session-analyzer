@@ -42,6 +42,7 @@ def load_participants(filename):
 def load_sessions(filename, participants):
     sessions = {}
     rejected_records = []
+    session_row_counts = {}
 
     required_fields = [
         "session_id",
@@ -67,6 +68,15 @@ def load_sessions(filename, participants):
         reader = csv.DictReader(csvfile)
 
         for row_number, row in enumerate(reader, start=2):
+
+            raw_session_id = row.get("session_id")
+
+            if raw_session_id is not None and raw_session_id.strip() != "":
+                if raw_session_id not in session_row_counts:
+                    session_row_counts[raw_session_id] = 0
+
+                session_row_counts[raw_session_id] += 1
+
 
             # 1. Check for unexpected extra columns
             if None in row:
@@ -202,4 +212,4 @@ def load_sessions(filename, participants):
             # 10. Add observation to the correct session
             sessions[session_id].observations.append(observation)
 
-    return sessions, rejected_records
+    return sessions, rejected_records, session_row_counts

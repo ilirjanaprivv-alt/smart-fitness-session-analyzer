@@ -1,0 +1,6 @@
+session_id,participant_id,usable_observations,classification,average_heart_rate,average_activity_level,average_signal_quality
+FIT-2026-001,P001,6,resting,68.83333333333333,0.09333333333333334,0.9700000000000001
+FIT-2026-002,P002,6,moderate activity,102.0,0.49500000000000005,0.945
+FIT-2026-003,P003,6,high activity,132.5,0.7466666666666667,0.9433333333333334
+FIT-2026-004,P001,6,recovering,113.16666666666667,0.5466666666666666,0.9566666666666667
+FIT-2026-101,P001,1,insufficient data,72.0,0.1,0.96

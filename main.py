@@ -48,11 +48,18 @@ def main():
 
     all_sessions = {}
     all_rejected_records = []
+    all_session_row_counts = {}
 
     for session_file in session_files:
-        sessions, rejected_records = load_sessions(session_file, participants)
+        sessions, rejected_records, session_row_counts = load_sessions(session_file, participants)
 
         all_rejected_records.extend(rejected_records)
+
+        for session_id, count in session_row_counts.items():
+            if session_id not in all_session_row_counts:
+                all_session_row_counts[session_id] = 0
+
+            all_session_row_counts[session_id] += count
 
         for session_id, session in sessions.items():
             if session_id not in all_sessions:
@@ -66,7 +73,15 @@ def main():
     reports = []
 
     for session in all_sessions.values():
-        report = analyze_session(session, len(session.observations))
+        total_observations = all_session_row_counts.get(
+            session.session_id,
+            len(session.observations)
+        )
+
+        report = analyze_session(
+            session,
+            total_observations
+        )
 
         reports.append(report)
 
